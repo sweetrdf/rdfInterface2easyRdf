@@ -62,7 +62,8 @@ Conversion in this direction is straightforward:
   echo rdfInterface2easyRdf\AsEasyRdf::AsEasyRdf($node)->getGraph()->dump('text');
   echo rdfInterface2easyRdf\AsEasyRdf::AsEasyRdf($dataset)->dump('text');
   ```
-  * If you want converted data to be appended to an already existing graph, pass it as a second parameter, e.g.:
+  * If you want converted data to be appended to an already existing graph, pass it as a second parameter, e.g.
+    (continuing the code from the previous example):
     ```php
     $graph = new EasyRdf\Graph();
     $graph->resource('http://baz')->addLiteral('https://foo', 'other value');

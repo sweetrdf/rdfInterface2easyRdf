@@ -33,7 +33,7 @@ use rdfInterface\LiteralInterface;
 use rdfInterface\NamedNodeInterface;
 use rdfInterface\BlankNodeInterface;
 use rdfInterface\QuadInterface;
-use rdfInterface\NodeInterface;
+use rdfInterface\DatasetNodeInterface;
 use rdfInterface\QuadIteratorInterface;
 use rdfInterface\QuadIteratorAggregateInterface;
 
@@ -53,39 +53,35 @@ class AsEasyRdf {
      * - rdfInterface\QuadInterface => EasyRdf\Resource with quad's predicate and object assigned.
      *   The conversion will fail if quad's subject or object can't be represented in the EasyRdf
      *   (e.g. when they are quads).
-     * - rdfInterface\DatasetInterface => EasyRdf\Graph
+     * - rdfInterface\DatasetNodeInterface => EasyRdf\Resource
+     * - rdfInterface\QuadIteratorInterface => EasyRdf\Graph
+     * - rdfInterface\QuadIteratorAggregateInterface => EasyRdf\Graph
      * 
-     * @param LiteralInterface|BlankNodeInterface|NamedNodeInterface|QuadInterface|QuadIteratorInterface|QuadIteratorAggregateInterface $source
+     * @param LiteralInterface|BlankNodeInterface|NamedNodeInterface|QuadInterface|DatasetNodeInterface|QuadIteratorInterface|QuadIteratorAggregateInterface $source
      * @param Graph $graph EasyRdf graph to embed the converted objects into.
      *   If not provided, a new empty graph is used.
      * @return Resource
      */
-    static public function asEasyRdf(LiteralInterface | BlankNodeInterface | NamedNodeInterface | QuadInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
+    static public function asEasyRdf(LiteralInterface | BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
                                      Graph $graph = null): mixed {
         $graph ??= new Graph();
         if ($source instanceof LiteralInterface) {
-            return new Literal($source->getValue(), $source->getLang(), $source->getDatatype());
+            return new Literal($source->getValue(), $source->getLang(), empty($source->getLang()) ? $source->getDatatype() : null);
         } elseif ($source instanceof BlankNodeInterface || $source instanceof NamedNodeInterface) {
             return $graph->resource($source->getValue());
         } elseif ($source instanceof QuadInterface) {
             $res = $graph->resource($source->getSubject()->getValue());
             $res->add($source->getPredicate()->getValue(), self::asEasyRdf($source->getObject(), $graph));
             return $res;
-        } elseif ($source instanceof NodeInterface) {
-            try {
-                $resUri = $source->getTerm()->getValue();
-                foreach ($source->getDataset() as $quad) {
-                    self::asEasyRdf($quad, $graph);
-                }
-                return $graph->resource($resUri);
-            } catch (\Throwable $ex) {
-                // most probably an ordinary Dataset
+        } elseif ($source instanceof DatasetNodeInterface) {
+            $graph = self::asEasyRdf($source->getDataset(), $graph);
+            return $graph->resource($source->getNode()->getValue());
+        } elseif ($source instanceof QuadIteratorInterface || $source instanceof QuadIteratorAggregateInterface) {
+            foreach ($source as $quad) {
+                self::asEasyRdf($quad, $graph);
             }
+            return $graph;
         }
-        foreach ($source as $quad) {
-            self::asEasyRdf($quad, $graph);
-        }
-        return $graph;
     }
 
     /**
@@ -96,36 +92,34 @@ class AsEasyRdf {
      * @return Literal
      * @see asEasyRdf()
      */
-    static public
-        function asLiteral(LiteralInterface $source, Graph $graph = null): Literal {
+    static public function asLiteral(LiteralInterface $source,
+                                     Graph $graph = null): Literal {
         return self::asEasyRdf($source, $graph);
     }
 
     /**
      * Strongly-typed version of asEasyRdfResource().
      * 
-     * @param BlankNodeInterface|NamedNodeInterface|QuadInterface|NodeInterface $source
+     * @param BlankNodeInterface|NamedNodeInterface|QuadInterface|DatasetNodeInterface $source
      * @param Graph $graph
      * @return Resource
      * @see asEasyRdf()
      */
-    static public
-        function asResource(BlankNodeInterface | NamedNodeInterface | QuadInterface | NodeInterface $source,
-                            Graph $graph = null): Resource {
+    static public function asResource(BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface $source,
+                                      Graph $graph = null): Resource {
         return self::asEasyRdf($source, $graph);
     }
 
     /**
      * Strongly-typed version of asEasyRdfResource().
      * 
-     * @param NodeInterface|QuadIteratorInterface|QuadIteratorAggregateInterface $source
+     * @param DatasetNodeInterface|QuadIteratorInterface|QuadIteratorAggregateInterface $source
      * @param Graph $graph
      * @return Graph
      * @see asEasyRdf()
      */
-    static public
-        function asGraph(NodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
-                         Graph $graph = null): Graph {
+    static public function asGraph(DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
+                                   Graph $graph = null): Graph {
         $graph = self::asEasyRdf($source, $graph);
         return $graph instanceof Resource ? $graph->getGraph() : $graph;
     }
