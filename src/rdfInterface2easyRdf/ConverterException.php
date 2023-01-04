@@ -31,6 +31,6 @@ namespace rdfInterface2easyRdf;
  *
  * @author zozlak
  */
-class ConverterException extends RuntimeException {
+class ConverterException extends \RuntimeException {
     
 }
