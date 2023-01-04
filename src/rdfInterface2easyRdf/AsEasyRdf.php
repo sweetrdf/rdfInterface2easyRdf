@@ -29,6 +29,7 @@ namespace rdfInterface2easyRdf;
 use EasyRdf\Resource;
 use EasyRdf\Graph;
 use EasyRdf\Literal;
+use rdfInterface\TermInterface;
 use rdfInterface\LiteralInterface;
 use rdfInterface\NamedNodeInterface;
 use rdfInterface\BlankNodeInterface;
@@ -57,13 +58,13 @@ class AsEasyRdf {
      * - rdfInterface\QuadIteratorInterface => EasyRdf\Graph
      * - rdfInterface\QuadIteratorAggregateInterface => EasyRdf\Graph
      * 
-     * @param LiteralInterface|BlankNodeInterface|NamedNodeInterface|QuadInterface|DatasetNodeInterface|QuadIteratorInterface|QuadIteratorAggregateInterface $source
+     * @param TermInterface|LiteralInterface|BlankNodeInterface|NamedNodeInterface|QuadInterface|DatasetNodeInterface|QuadIteratorInterface|QuadIteratorAggregateInterface $source
      * @param Graph $graph EasyRdf graph to embed the converted objects into.
      *   If not provided, a new empty graph is used.
-     * @return Resource
+     * @return Resource | Literal | Graph
      */
-    static public function asEasyRdf(LiteralInterface | BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
-                                     Graph $graph = null): mixed {
+    static public function asEasyRdf(TermInterface | LiteralInterface | BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
+                                     Graph $graph = null): Resource | Literal | Graph {
         $graph ??= new Graph();
         if ($source instanceof LiteralInterface) {
             return new Literal($source->getValue(), $source->getLang(), empty($source->getLang()) ? $source->getDatatype() : null);
@@ -82,6 +83,7 @@ class AsEasyRdf {
             }
             return $graph;
         }
+        throw new ConverterException("Unprocessable term type" . $source::class);
     }
 
     /**
