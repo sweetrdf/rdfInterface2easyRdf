@@ -14,8 +14,8 @@
     ],
     "require": {
         "php": ">=8.0",
-        "sweetrdf/rdf-interface": "^1.1.0-RC3",
-        "sweetrdf/rdf-helpers": "^1.1.0-RC2"
+        "sweetrdf/rdf-interface": "^1.1.0-RC4",
+        "sweetrdf/rdf-helpers": "^1.1.0-RC3"
     },
     "suggest": {
         "sweetrdf/quick-rdf": "^1.0",
