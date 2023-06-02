@@ -65,15 +65,15 @@ Conversion in this direction might get tricky. Important remarks:
 * As the rdfInterface doesn't define a standardized way to create datasets 
   (`rdfInterface\DatasetInterface`) and dataset nodes (`rdfInterface\DatasetNodeInterface`)
   the `asRdfInterface()` method returns an `rdfInterface\QuadIteratorInterface`
-  when the output is a set of triples.
+  which is a triples iterator.
   **The only way to convert an `EasyRdf\Resource` or `EasyRdf\Graph` to
   a dataset or dataset node is to add triples from the EasyRdf object to an
   existing `rdfInterface\DatasetInterface` or `rdfInterface\DatasetNodeInterface`.**
   The `add()`, `addDataset()` and `addDatasetNode()` methods can be used for that
   (see examples below).
-* There's a lot of amiguity around the `EasyRdf\Resource` conversion.
-  You might one to convert it to an RDF term (`rdfInterface\BlankNode` or `rdfInterface\NamedNode`)
-  or you might one to convert it to a set of triples (quad iterator, dataset or dataset node).
+* There's an ambiguity around the `EasyRdf\Resource` conversion.
+  You may want convert it to an RDF term (`rdfInterface\BlankNode` or `rdfInterface\NamedNode`)
+  or you may want to convert it to a set of triples (quad iterator, dataset or dataset node).
   * The `asRdfInterface()` method converts to an RDF term if the `EasyRdf\Resource`
     object has no properties (no triples) and to a `rdfInterface\QuadIteratorInterface`
     otherwise.
