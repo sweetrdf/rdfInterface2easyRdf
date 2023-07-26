@@ -28,17 +28,17 @@ namespace rdfInterface2easyRdf;
 
 use quickRdf\DataFactory as DF;
 use quickRdf\Dataset;
+use quickRdf\DatasetNode;
 use rdfInterface2easyRdf\AsEasyRdf;
 use EasyRdf\Literal;
 use EasyRdf\Resource;
 use EasyRdf\Graph;
-use rdfHelpers\DatasetNode;
 
 /**
  *
  * @author zozlak
  */
-class DatasetTest extends \PHPUnit\Framework\TestCase {
+class AsEasyRdfTest extends \PHPUnit\Framework\TestCase {
 
     public function testAsEasyRdf(): void {
         $blank    = DF::blankNode();
@@ -49,7 +49,7 @@ class DatasetTest extends \PHPUnit\Framework\TestCase {
         $quad     = DF::quad($blank, $named, $literal2);
         $dataset  = new Dataset();
         $dataset->add($quad);
-        $node     = new DatasetNode($dataset, $named);
+        $node     = DatasetNode::factory($named)->withDataset($dataset);
 
         $tmp = AsEasyRdf::asEasyRdf($blank);
         $this->assertInstanceOf(Resource::class, $tmp);
@@ -118,8 +118,8 @@ class DatasetTest extends \PHPUnit\Framework\TestCase {
         $literal2 = DF::literal('bar', 'en');
         $dataset  = new Dataset();
         $dataset->add(DF::quad($blank, $named, $literal2));
-        $node     = new DatasetNode($dataset, $named);
-        
+        $node     = DatasetNode::factory($named)->withDataset($dataset);
+
         $tmp = AsEasyRdf::asResource($blank);
         $this->assertInstanceOf(Resource::class, $tmp);
         $this->assertTrue($tmp->isBNode());
@@ -141,9 +141,9 @@ class DatasetTest extends \PHPUnit\Framework\TestCase {
         $literal2 = DF::literal('bar', 'en');
         $dataset  = new Dataset();
         $dataset->add(DF::quad($blank, $named, $literal2));
-        $node     = new DatasetNode($dataset, $named);
-        
-        $tmp  = AsEasyRdf::asGraph($node);
+        $node     = DatasetNode::factory($named)->withDataset($dataset);
+
+        $tmp = AsEasyRdf::asGraph($node);
         $this->assertInstanceOf(Graph::class, $tmp);
         $res = $tmp->resources();
         $this->assertCount(2, $res);

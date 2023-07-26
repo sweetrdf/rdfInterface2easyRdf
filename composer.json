@@ -14,11 +14,11 @@
     ],
     "require": {
         "php": ">=8.0",
-        "sweetrdf/rdf-interface": "^1.1.0-RC4",
-        "sweetrdf/rdf-helpers": "^1.1.0-RC3"
+        "sweetrdf/rdf-interface": "^2.0.0-RC1",
+        "sweetrdf/rdf-helpers": "^1.0.2"
     },
     "suggest": {
-        "sweetrdf/quick-rdf": "^1.0",
+        "sweetrdf/quick-rdf": "^2.0.0-RC1",
         "sweetrdf/easyrdf": "^1.4"
     },
     "autoload": {
@@ -30,7 +30,7 @@
         "phpunit/phpunit": "^9.5",
         "phpstan/phpstan": "*",
         "php-coveralls/php-coveralls": "^2.4",
-        "sweetrdf/quick-rdf": "^1.0",
+        "sweetrdf/quick-rdf": "^2.0.0-RC1",
         "sweetrdf/easyrdf": "^1.4"
     },
     "autoload-dev": {

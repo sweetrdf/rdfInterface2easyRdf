@@ -35,8 +35,8 @@ use quickRdf\NamedNode;
 use quickRdf\Literal;
 use quickRdf\Quad;
 use quickRdf\Dataset;
+use quickRdf\DatasetNode;
 use rdfHelpers\GenericQuadIterator;
-use rdfHelpers\DatasetNode;
 use rdfInterface2easyRdf\AsRdfInterface;
 
 /**
@@ -275,7 +275,7 @@ class AsRdfInterfaceTest extends \PHPUnit\Framework\TestCase {
         $this->assertCount(1, $triples);
         $this->assertTrue($quad1->equals($triples[0]));
         
-        $datasetNode  = AsRdfInterface::add($res1, self::$df, fn($x) => new DatasetNode(new Dataset(), $x));
+        $datasetNode  = AsRdfInterface::add($res1, self::$df, fn($x) => DatasetNode::factory($x));
         $this->assertInstanceOf(DatasetNode::class, $datasetNode);
         $this->assertTrue($quad1->getSubject()->equals($datasetNode->getNode()));
         $resTriples   = iterator_to_array($datasetNode->getIterator());
@@ -285,7 +285,7 @@ class AsRdfInterfaceTest extends \PHPUnit\Framework\TestCase {
         $this->assertCount(2, $graphTriples);
         $this->assertTrue($quad1->equals($graphTriples[0]) && $quad2->equals($graphTriples[1]) || $quad1->equals($graphTriples[1]) && $quad2->equals($graphTriples[0]));
 
-        $datasetNode  = AsRdfInterface::add($res1, self::$df, new DatasetNode(new Dataset(), self::$df::blankNode()), false);
+        $datasetNode  = AsRdfInterface::add($res1, self::$df, DatasetNode::factory(self::$df::blankNode()), false);
         $this->assertInstanceOf(DatasetNode::class, $datasetNode);
         $this->assertTrue($quad1->getSubject()->equals($datasetNode->getNode()));
         $resTriples   = iterator_to_array($datasetNode->getIterator());
@@ -354,7 +354,7 @@ class AsRdfInterfaceTest extends \PHPUnit\Framework\TestCase {
         $quad1 = self::$df::quad(self::$df::namedNode('http://foo'), self::$df::namedNode('http://baz'), self::$df::literal('literal'));
         $quad2 = self::$df::quad(self::$df::namedNode('http://bar'), self::$df::namedNode('http://baz'), self::$df::namedNode('resource'));
 
-        $datasetNode  = AsRdfInterface::addDatasetNode($res1, self::$df, new DatasetNode(new Dataset(), self::$df::blankNode()));
+        $datasetNode  = AsRdfInterface::addDatasetNode($res1, self::$df, DatasetNode::factory(self::$df::blankNode()));
         $this->assertInstanceOf(DatasetNode::class, $datasetNode);
         $this->assertTrue($quad1->getSubject()->equals($datasetNode->getNode()));
         $resTriples   = iterator_to_array($datasetNode->getIterator());
@@ -364,7 +364,7 @@ class AsRdfInterfaceTest extends \PHPUnit\Framework\TestCase {
         $this->assertCount(2, $graphTriples);
         $this->assertTrue($quad1->equals($graphTriples[0]) && $quad2->equals($graphTriples[1]) || $quad1->equals($graphTriples[1]) && $quad2->equals($graphTriples[0]));
 
-        $dataset      = AsRdfInterface::addDatasetNode($res1, self::$df, fn($x) => new DatasetNode(new Dataset(), $x));
+        $dataset      = AsRdfInterface::addDatasetNode($res1, self::$df, fn($x) => DatasetNode::factory($x));
         $this->assertInstanceOf(DatasetNode::class, $datasetNode);
         $this->assertTrue($quad1->getSubject()->equals($datasetNode->getNode()));
         $resTriples   = iterator_to_array($datasetNode->getIterator());
@@ -374,7 +374,7 @@ class AsRdfInterfaceTest extends \PHPUnit\Framework\TestCase {
         $this->assertCount(2, $graphTriples);
         $this->assertTrue($quad1->equals($graphTriples[0]) && $quad2->equals($graphTriples[1]) || $quad1->equals($graphTriples[1]) && $quad2->equals($graphTriples[0]));
 
-        $datasetNode  = AsRdfInterface::addDatasetNode($res1, self::$df, new DatasetNode(new Dataset(), self::$df::blankNode()), false);
+        $datasetNode  = AsRdfInterface::addDatasetNode($res1, self::$df, DatasetNode::factory(self::$df::blankNode()), false);
         $this->assertInstanceOf(DatasetNode::class, $datasetNode);
         $this->assertTrue($quad1->getSubject()->equals($datasetNode->getNode()));
         $resTriples   = iterator_to_array($datasetNode->getIterator());
