@@ -63,7 +63,7 @@ class AsEasyRdfTest extends \PHPUnit\Framework\TestCase {
         $tmp = AsEasyRdf::asEasyRdf($literal1);
         $this->assertInstanceOf(Literal::class, $tmp);
         $this->assertEquals($literal1->getValue(), $tmp->getValue());
-        $this->assertNull($tmp->getLang());
+        $this->assertEquals('', $tmp->getLang());
         $this->assertEquals('xsd:string', $tmp->getDatatype());
 
         $tmp = AsEasyRdf::asEasyRdf($literal2);
@@ -78,12 +78,14 @@ class AsEasyRdfTest extends \PHPUnit\Framework\TestCase {
         $this->assertEmpty($tmp->getLang());
         $this->assertEquals('xsd:integer', $tmp->getDatatype());
 
+        /** @var \EasyRdf\Resource */
         $tmp  = AsEasyRdf::asEasyRdf($quad);
         $prop = $tmp->getGraph()->resource('http://foo');
         $this->assertInstanceOf(Resource::class, $tmp);
         $this->assertEquals('bar', $tmp->get($prop)->getValue());
         $this->assertEquals('en', $tmp->get($prop)->getLang());
 
+        /** @var \EasyRdf\Resource */
         $tmp  = AsEasyRdf::asEasyRdf($node);
         $prop = $tmp->getGraph()->resource('http://foo');
         $this->assertInstanceOf(Resource::class, $tmp);
@@ -93,7 +95,10 @@ class AsEasyRdfTest extends \PHPUnit\Framework\TestCase {
         $this->assertInstanceOf(Graph::class, $tmp);
         $res = $tmp->resources();
         $this->assertCount(1, $res);
-        $this->assertTrue(reset($res)->isBNode());
+
+        $item = reset($res);
+        $this->assertTrue($item instanceof Resource);
+        $this->assertTrue($item->isBNode());
 
         $graph = new Graph();
         $graph->resource('http://baz')->addLiteral('https://foo', 'other value');
@@ -108,7 +113,7 @@ class AsEasyRdfTest extends \PHPUnit\Framework\TestCase {
         $tmp = AsEasyRdf::asLiteral($literal1);
         $this->assertInstanceOf(Literal::class, $tmp);
         $this->assertEquals($literal1->getValue(), $tmp->getValue());
-        $this->assertNull($tmp->getLang());
+        $this->assertEquals('', $tmp->getLang());
         $this->assertEquals('xsd:string', $tmp->getDatatype());
     }
 
@@ -147,12 +152,18 @@ class AsEasyRdfTest extends \PHPUnit\Framework\TestCase {
         $this->assertInstanceOf(Graph::class, $tmp);
         $res = $tmp->resources();
         $this->assertCount(2, $res);
-        $this->assertTrue(reset($res)->isBNode());
+
+        $item = reset($res);
+        $this->assertTrue($item instanceof Resource);
+        $this->assertTrue($item->isBNode());
 
         $tmp = AsEasyRdf::asGraph($dataset);
         $this->assertInstanceOf(Graph::class, $tmp);
         $res = $tmp->resources();
         $this->assertCount(1, $res);
-        $this->assertTrue(reset($res)->isBNode());
+
+        $item = reset($res);
+        $this->assertTrue($item instanceof Resource);
+        $this->assertTrue($item->isBNode());
     }
 }

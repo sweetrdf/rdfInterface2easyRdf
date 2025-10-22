@@ -29,6 +29,7 @@ namespace rdfInterface2easyRdf;
 use EasyRdf\Literal as erLiteral;
 use EasyRdf\Resource;
 use EasyRdf\Graph;
+use Exception;
 use quickRdf\DataFactory;
 use quickRdf\BlankNode;
 use quickRdf\NamedNode;
@@ -137,7 +138,7 @@ class AsRdfInterfaceTest extends \PHPUnit\Framework\TestCase {
         $res   = $graph->resource('http://foo');
         try {
             $tmp = AsRdfInterface::asQuad($res, self::$df);
-            $this->assertTrue(false);
+            throw new Exception('We expect a ConverterException to be thrown when calling asQuad');
         } catch (ConverterException $e) {
             $this->assertEquals("EasyRdf\Resource contains no triples, therfore can't be converted to a quad", $e->getMessage());
         }
