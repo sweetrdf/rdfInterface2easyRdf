@@ -38,5 +38,5 @@ jobs:
     - name: composer
       run: composer update
     - name: phpstan
-      run: vendor/bin/phpstan analyse -l 8 src tests || true
+      run: vendor/bin/phpstan
 
