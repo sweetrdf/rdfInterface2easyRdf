@@ -27,6 +27,7 @@
 namespace rdfInterface2easyRdf;
 
 use Generator;
+use DateTime;
 use EasyRdf\Resource;
 use EasyRdf\Graph;
 use EasyRdf\Literal;
@@ -80,10 +81,6 @@ class AsRdfInterface {
      * - not blank EasyRdf\Resource => rdfInterface\NamedNode if it has no properties
      *   or rdfInterface\QuadIteratorInterface it it has at least one property
      * - EasyRdf\Graph => rdfInterface\QuadIteratorInterface
-     * 
-     * @param Literal|Resource|Graph $source
-     * @param DataFactoryInterface $dataFactory
-     * @return LiteralInterface|BlankNodeInterface|NamedNodeInterface|QuadIteratorInterface
      */
     static public function asRdfInterface(Literal | Resource | Graph $source,
                                           DataFactoryInterface $dataFactory): LiteralInterface | BlankNodeInterface | NamedNodeInterface | QuadIteratorInterface {
@@ -97,10 +94,6 @@ class AsRdfInterface {
     /**
      * Stronger-typed version of asRdfInterface() which always returns 
      * a rdfInterface\QuadIteratorInterface.
-     * 
-     * @param Graph|Resource $source
-     * @param DataFactoryInterface $dataFactory
-     * @return QuadIteratorInterface
      */
     static public function asQuadIterator(Graph | Resource $source,
                                           DataFactoryInterface $dataFactory): QuadIteratorInterface {
@@ -111,8 +104,6 @@ class AsRdfInterface {
      * Appends contents of a given EasyRdf\Resource or EasyRdf\Graph to
      * a given rdfInterface\Dataset
      * 
-     * @param Graph|Resource $source
-     * @param DataFactoryInterface $dataFactory
      * @param DatasetInterface|DatasetNodeInterface|callable $datasetOrNode If callable is used,
      *   calling it with should create an rdfInterface\DatasetInterface object or
      *   an rdfInterface\DatasetNodeInterface object (if $source is an EasyRdf\Resource,
@@ -122,7 +113,6 @@ class AsRdfInterface {
      *   should the whole graph be copied (true) or only triples having $source
      *   as a subject (false). The default value is true if $datasetOrNode is 
      *   rdfInterface\DatasetInstance and false is $datasetOrNode is rdfInterface\DatasetNodeInstance.
-     * @return DatasetNodeInterface
      */
     static public function add(Graph | Resource $source,
                                DataFactoryInterface $dataFactory,
@@ -131,25 +121,15 @@ class AsRdfInterface {
         $sourceIsRes = $source instanceof Resource;
         if (is_callable($datasetOrNode)) {
             $datasetOrNode = $sourceIsRes ? $datasetOrNode(self::asTerm($source, $dataFactory)) : $datasetOrNode();
+            /* @phpstan-ignore instanceof.alwaysFalse */
+            if (!($datasetOrNode instanceof DatasetInterface || $datasetOrNode instanceof DatasetNodeInterface)) {
+                throw new ConverterException('If the $dataset parameter is a callable, it has to create an object of class ' . DatasetInterface::class . ' or ' . DatasetNodeInterface::class);
+            }
         } elseif ($datasetOrNode instanceof DatasetNodeInterface && $sourceIsRes) {
             $datasetOrNode = $datasetOrNode->withNode(self::asTerm($source, $dataFactory));
         }
 
-        /**
-         * PHPStan complains about the next line:
-         *
-         *      Instanceof between mixed and rdfInterface\DatasetNodeInterface will always evaluate to false.
-         *
-         * The problem here is that $datasetOrNode can be anything is rightfully considered mixed.
-         * We need a way to determine the type of the returned value when $datasetOrNode is a callable
-         * but also make sure $datasetOrNode is an instance of DatasetInterface or DatasetNodeInterface.
-         *
-         * @phpstan-ignore-next-line
-         */
-        if (!($datasetOrNode instanceof DatasetInterface || $datasetOrNode instanceof DatasetNodeInterface)) {
-            throw new ConverterException('If the $dataset parameter is a callable, it has to create an object of class ' . DatasetInterface::class . ' or ' . DatasetNodeInterface::class);
-        }
-        $dataset = $datasetOrNode instanceof DatasetNodeInterface ? $datasetOrNode->getDataset() : $datasetOrNode;
+        $dataset    = $datasetOrNode instanceof DatasetNodeInterface ? $datasetOrNode->getDataset() : $datasetOrNode;
         $wholeGraph ??= $datasetOrNode instanceof DatasetNodeInterface;
         if ($sourceIsRes && $wholeGraph) {
             $source = $source->getGraph();
@@ -161,15 +141,12 @@ class AsRdfInterface {
     /**
      * Strongly-typed version of add().
      * 
-     * @param Graph|Resource $source
-     * @param DataFactoryInterface $dataFactory
      * @param DatasetInterface|callable $dataset If callable is used,
      *   calling it with no parameters should create 
      *   an rdfInterface\DataseInterface object.
      * @param bool $wholeGraph if an EasyRdf\Resource is passed as a $source, 
      *   should the whole graph be copied (true) or only triples having $source
      *   as a subject (false).
-     * @return DatasetInterface
      * @see add()
      */
     static public function addDataset(Graph | Resource $source,
@@ -182,22 +159,23 @@ class AsRdfInterface {
     /**
      * Strongly-typed version of add().
      * 
-     * @param Resource $source
-     * @param DataFactoryInterface $dataFactory
      * @param DatasetNodeInterface|callable $datasetNode If callable is used,
      *   calling it with an EasyRdf\Resource URI as a first parameters should create 
      *   an rdfInterface\DataseNodeInterface object.
      * @param bool $wholeGraph if an EasyRdf\Resource is passed as a $source, 
      *   should the whole graph be copied (true) or only triples having $source
      *   as a subject (false).
-     * @return DatasetNodeInterface
      * @see add()
      */
     static public function addDatasetNode(Resource $source,
                                           DataFactoryInterface $dataFactory,
                                           DatasetNodeInterface | callable $datasetNode,
                                           bool $wholeGraph = true): DatasetNodeInterface {
-        return self::add($source, $dataFactory, $datasetNode, $wholeGraph);
+        $datasetNode = self::add($source, $dataFactory, $datasetNode, $wholeGraph);
+        if (!($datasetNode instanceof DatasetNodeInterface)) {
+            throw new ConverterException('If the $dataset parameter is a callable, it has to create an object of class ' . DatasetNodeInterface::class);
+        }
+        return $datasetNode;
     }
 
     /**
@@ -206,10 +184,6 @@ class AsRdfInterface {
      * 
      * It means an EasyRdf\Resource is always converted to an rdfInterface\BlankNode
      * or an rdfInterface\NamedNode.
-     * 
-     * @param Literal|Resource $source
-     * @param DataFactoryInterface $dataFactory
-     * @return LiteralInterface|BlankNodeInterface|NamedNodeInterface
      */
     static public function asTerm(Literal | Resource $source,
                                   DataFactoryInterface $dataFactory): LiteralInterface | BlankNodeInterface | NamedNodeInterface {
@@ -223,9 +197,6 @@ class AsRdfInterface {
     /**
      * Strongly-typed version of asRdfInterfaceTerm().
      * 
-     * @param Literal|string $source
-     * @param DataFactoryInterface $dataFactory
-     * @return LiteralInterface
      */
     static public function asLiteral(Literal | string $source,
                                      DataFactoryInterface $dataFactory): LiteralInterface {
@@ -234,7 +205,11 @@ class AsRdfInterface {
             if (!empty($datatype)) {
                 $datatype = RdfNamespace::expand($datatype);
             }
-            return $dataFactory::literal($source->getValue(), $source->getLang(), $datatype);
+            $value = $source->getValue();
+            if ($value instanceof DateTime) {
+                $value = $value->format(DateTime::ISO8601);
+            }
+            return $dataFactory::literal($value, $source->getLang(), $datatype);
         } else {
             return $dataFactory::literal($source);
         }
@@ -243,9 +218,6 @@ class AsRdfInterface {
     /**
      * Strongly-typed version of asRdfInterfaceTerm().
      * 
-     * @param Resource|string $source
-     * @param DataFactoryInterface $dataFactory
-     * @return BlankNodeInterface
      */
     static public function asBlankNode(Resource | string $source,
                                        DataFactoryInterface $dataFactory): BlankNodeInterface {
@@ -254,10 +226,6 @@ class AsRdfInterface {
 
     /**
      * Strongly-typed version of asRdfInterfaceTerm().
-     * 
-     * @param Resource|string $source
-     * @param DataFactoryInterface $dataFactory
-     * @return NamedNodeInterface
      */
     static public function asNamedNode(Resource | string $source,
                                        DataFactoryInterface $dataFactory): NamedNodeInterface {
@@ -269,10 +237,6 @@ class AsRdfInterface {
      * by taking the first property returned by the $source->propertyUris()
      * as quad's predicate and first value returned by $source->get(property)
      * as quad's object.
-     * 
-     * @param Resource $source
-     * @param DataFactoryInterface $dataFactory
-     * @return QuadInterface
      */
     static public function asQuad(Resource $source,
                                   DataFactoryInterface $dataFactory): QuadInterface {

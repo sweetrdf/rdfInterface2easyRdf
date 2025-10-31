@@ -58,10 +58,8 @@ class AsEasyRdf {
      * - rdfInterface\QuadIteratorInterface => EasyRdf\Graph
      * - rdfInterface\QuadIteratorAggregateInterface => EasyRdf\Graph
      * 
-     * @param TermInterface|LiteralInterface|BlankNodeInterface|NamedNodeInterface|QuadInterface|DatasetNodeInterface|QuadIteratorInterface|QuadIteratorAggregateInterface $source
      * @param Graph $graph EasyRdf graph to embed the converted objects into.
      *   If not provided, a new empty graph is used.
-     * @return Resource | Literal | Graph
      */
     static public function asEasyRdf(
         TermInterface | LiteralInterface | BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
@@ -92,9 +90,6 @@ class AsEasyRdf {
     /**
      * Strongly-typed version of asEasyRdfResource().
      * 
-     * @param LiteralInterface $source
-     * @param Graph $graph
-     * @return Literal
      * @see asEasyRdf()
      */
     static public function asLiteral(LiteralInterface $source,
@@ -107,9 +102,6 @@ class AsEasyRdf {
     /**
      * Strongly-typed version of asEasyRdfResource().
      * 
-     * @param BlankNodeInterface|NamedNodeInterface|QuadInterface|DatasetNodeInterface $source
-     * @param Graph $graph
-     * @return Resource
      * @see asEasyRdf()
      */
     static public function asResource(BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface $source,
@@ -122,9 +114,6 @@ class AsEasyRdf {
     /**
      * Strongly-typed version of asEasyRdfResource().
      * 
-     * @param DatasetNodeInterface|QuadIteratorInterface|QuadIteratorAggregateInterface $source
-     * @param Graph $graph
-     * @return Graph
      * @see asEasyRdf()
      */
     static public function asGraph(DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
