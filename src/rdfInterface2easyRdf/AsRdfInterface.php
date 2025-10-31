@@ -114,7 +114,7 @@ class AsRdfInterface {
      * @param Graph|Resource $source
      * @param DataFactoryInterface $dataFactory
      * @param DatasetInterface|DatasetNodeInterface|callable $datasetOrNode If callable is used,
-     *   calling it with should create an rdfInterface\DataseInterface object or 
+     *   calling it with should create an rdfInterface\DatasetInterface object or
      *   an rdfInterface\DatasetNodeInterface object (if $source is an EasyRdf\Resource,
      *   the callable is called with $source URI converted to rdfInterface\Term 
      *   as a first parameter).
@@ -134,6 +134,18 @@ class AsRdfInterface {
         } elseif ($datasetOrNode instanceof DatasetNodeInterface && $sourceIsRes) {
             $datasetOrNode = $datasetOrNode->withNode(self::asTerm($source, $dataFactory));
         }
+
+        /**
+         * PHPStan complains about the next line:
+         *
+         *      Instanceof between mixed and rdfInterface\DatasetNodeInterface will always evaluate to false.
+         *
+         * The problem here is that $datasetOrNode can be anything is rightfully considered mixed.
+         * We need a way to determine the type of the returned value when $datasetOrNode is a callable
+         * but also make sure $datasetOrNode is an instance of DatasetInterface or DatasetNodeInterface.
+         *
+         * @phpstan-ignore-next-line
+         */
         if (!($datasetOrNode instanceof DatasetInterface || $datasetOrNode instanceof DatasetNodeInterface)) {
             throw new ConverterException('If the $dataset parameter is a callable, it has to create an object of class ' . DatasetInterface::class . ' or ' . DatasetNodeInterface::class);
         }

@@ -63,8 +63,10 @@ class AsEasyRdf {
      *   If not provided, a new empty graph is used.
      * @return Resource | Literal | Graph
      */
-    static public function asEasyRdf(TermInterface | LiteralInterface | BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
-                                     Graph $graph = null): Resource | Literal | Graph {
+    static public function asEasyRdf(
+        TermInterface | LiteralInterface | BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
+        ?Graph $graph = null
+    ): Resource | Literal | Graph {
         $graph ??= new Graph();
         if ($source instanceof LiteralInterface) {
             return new Literal($source->getValue(), $source->getLang(), empty($source->getLang()) ? $source->getDatatype() : null);
@@ -75,6 +77,7 @@ class AsEasyRdf {
             $res->add($source->getPredicate()->getValue(), self::asEasyRdf($source->getObject(), $graph));
             return $res;
         } elseif ($source instanceof DatasetNodeInterface) {
+            /** @var \EasyRdf\Graph */
             $graph = self::asEasyRdf($source->getDataset(), $graph);
             return $graph->resource($source->getNode()->getValue());
         } elseif ($source instanceof QuadIteratorInterface || $source instanceof QuadIteratorAggregateInterface) {
@@ -95,8 +98,10 @@ class AsEasyRdf {
      * @see asEasyRdf()
      */
     static public function asLiteral(LiteralInterface $source,
-                                     Graph $graph = null): Literal {
-        return self::asEasyRdf($source, $graph);
+                                     ?Graph $graph = null): Literal {
+        /** @var \EasyRdf\Literal */
+        $result = self::asEasyRdf($source, $graph);
+        return $result;
     }
 
     /**
@@ -108,8 +113,10 @@ class AsEasyRdf {
      * @see asEasyRdf()
      */
     static public function asResource(BlankNodeInterface | NamedNodeInterface | QuadInterface | DatasetNodeInterface $source,
-                                      Graph $graph = null): Resource {
-        return self::asEasyRdf($source, $graph);
+                                      ?Graph $graph = null): Resource {
+        /** @var \EasyRdf\Resource */
+        $result = self::asEasyRdf($source, $graph);
+        return $result;
     }
 
     /**
@@ -121,7 +128,8 @@ class AsEasyRdf {
      * @see asEasyRdf()
      */
     static public function asGraph(DatasetNodeInterface | QuadIteratorInterface | QuadIteratorAggregateInterface $source,
-                                   Graph $graph = null): Graph {
+                                   ?Graph $graph = null): Graph {
+        /** @var \EasyRdf\Resource|\EasyRdf\Graph */
         $graph = self::asEasyRdf($source, $graph);
         return $graph instanceof Resource ? $graph->getGraph() : $graph;
     }
